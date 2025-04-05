@@ -18,8 +18,7 @@ if st.button("検索する"):
             results = search(
                 keywords,
                 lang="ja",
-                country="jp",
-                n=20
+                country="jp"
             )
 
             # 情報を整形してDataFrame化
