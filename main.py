@@ -1,21 +1,28 @@
 import streamlit as st
-from google_play_scraper import search
+import pandas as pd
 
-# タイトル
-st.title("MyakuWatch - 万博アプリ監視ツール")
-st.write("万博関連アプリを検索し、不審なものを検出します。")
+# タイトルと説明
+st.title("MyakuWatch - 万博アプリ監視テスト")
+st.write("これはStreamlitアプリのテスト画面です。")
 
-# キーワード検索（固定 or 入力可能）
-query = st.text_input("検索キーワード", "expo 2025")
+# サンプルデータ（疑似的な検索結果）
+data = [
+    {"アプリ名": "EXPO 2025 Visitors", "開発者": "EXPO協会", "危険度": "安全"},
+    {"アプリ名": "EXPO Guide 2025", "開発者": "unknown_dev", "危険度": "注意"},
+    {"アプリ名": "Osaka EXPO", "開発者": "怪しい開発者", "危険度": "危険"},
+]
 
-# 検索ボタン
-if st.button("アプリを検索"):
-    results = search(query, lang="ja", country="jp", n=10)
+# データフレーム化して表示
+df = pd.DataFrame(data)
+st.dataframe(df)
 
-    for app in results:
-        st.markdown(f"### {app['title']}")
-        st.write(f"📦 パッケージ名：{app['appId']}")
-        st.write(f"🧑‍💻 開発者：{app['developer']}")
-        st.write(f"⭐ 評価：{app['score']}")
-        st.write(f"📝 説明：{app['description'][:150]}...")
-        st.write("---")
+# フィルター付きセレクトボックス
+option = st.selectbox("危険度でフィルター", ["すべて", "安全", "注意", "危険"])
+
+if option != "すべて":
+    filtered = df[df["危険度"] == option]
+else:
+    filtered = df
+
+st.subheader("フィルター結果")
+st.table(filtered)
