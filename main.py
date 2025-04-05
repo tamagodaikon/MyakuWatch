@@ -24,7 +24,7 @@ if st.button("検索する"):
                     "開発者": app["developer"],
                     "評価": app.get("score", "不明"),
                     "Google Play": f"[リンク]({google_url})",
-                    "APKダウンロード": f"[📥 ダウンロード]({apkcombo_url})"
+                    "APKダウンロード": f"[ダウンロード]({apkcombo_url})"
                 })
 
             df = pd.DataFrame(data)
