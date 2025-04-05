@@ -1,28 +1,48 @@
 import streamlit as st
+from google_play_scraper import search
 import pandas as pd
 
-# タイトルと説明
-st.title("MyakuWatch - 万博アプリ監視テスト")
-st.write("これはStreamlitアプリのテスト画面です。")
+# --- UI部 ---
+st.set_page_config(page_title="万博アプリ検索", layout="wide")
+st.title("🔍 万博関連アプリ検索ツール（Google Play）")
+st.write("Google Playから『expo』『万博』『2025』などのキーワードでアプリを自動検索します。")
 
-# サンプルデータ（疑似的な検索結果）
-data = [
-    {"アプリ名": "EXPO 2025 Visitors", "開発者": "EXPO協会", "危険度": "安全"},
-    {"アプリ名": "EXPO Guide 2025", "開発者": "unknown_dev", "危険度": "注意"},
-    {"アプリ名": "Osaka EXPO", "開発者": "怪しい開発者", "危険度": "危険"},
-]
+# --- 検索キーワード入力（初期値あり） ---
+keywords = st.text_input("検索キーワード", "expo 2025")
 
-# データフレーム化して表示
-df = pd.DataFrame(data)
-st.dataframe(df)
+# --- 検索ボタン ---
+if st.button("検索する"):
+    with st.spinner("検索中..."):
+        try:
+            # アプリ検索（最大20件取得）
+            results = search(
+                keywords,
+                lang="ja",
+                country="jp",
+                n=20
+            )
 
-# フィルター付きセレクトボックス
-option = st.selectbox("危険度でフィルター", ["すべて", "安全", "注意", "危険"])
+            # 情報を整形してDataFrame化
+            data = []
+            for app in results:
+                data.append({
+                    "アプリ名": app["title"],
+                    "パッケージ名": app["appId"],
+                    "開発者": app["developer"],
+                    "評価": app.get("score", "不明"),
+                    "インストール数": app.get("installs", "不明"),
+                    "Google Playリンク": f"https://play.google.com/store/apps/details?id={app['appId']}"
+                })
 
-if option != "すべて":
-    filtered = df[df["危険度"] == option]
-else:
-    filtered = df
+            df = pd.DataFrame(data)
 
-st.subheader("フィルター結果")
-st.table(filtered)
+            # 表示
+            st.success(f"{len(df)} 件のアプリが見つかりました。")
+            st.dataframe(df, use_container_width=True)
+
+            # CSVダウンロード
+            csv = df.to_csv(index=False)
+            st.download_button("📥 CSVでダウンロード", data=csv, file_name="expo_apps.csv", mime="text/csv")
+
+        except Exception as e:
+            st.error(f"検索中にエラーが発生しました：{e}")
