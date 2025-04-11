@@ -14,7 +14,7 @@ if st.button("検索する"):
     with st.spinner("Google Playを検索中…"):
         try:
             results = search(query, lang="ja", country="jp")
-            results = results[:10]  # 上位10件に制限
+            results = results[:100]  # 上位10件に制限
 
             apps = []
             for app in results:
